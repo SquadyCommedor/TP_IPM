@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #4F46E5;
+  --color-primary-light: #818CF8;
+  --color-primary-dark: #3730A3;
+  --color-secondary: #F59E0B;
+  --color-secondary-light: #FCD34D;
+  --color-accent: #10B981;
+  --color-accent-light: #6EE7B7;
+  --color-danger: #EF4444;
+  --color-danger-light: #FCA5A5;
+  --color-kid-bg: #FFF7ED;
+  --color-kid-card: #FFFBF5;
+  --color-parent-bg: #F0F4FF;
+  --color-parent-card: #FFFFFF;
+  --color-hair-dark: #3E2723;
+  --color-hair-brown: #6D4C41;
+  --color-hair-blonde: #F9D71C;
+  --color-hair-red: #C62828;
+  --color-hair-black: #212121;
+  --font-family-display: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+  --font-family-body: 'Segoe UI', system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-family-body);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .text-shadow-kid {
+    text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+  }
+  .bounce-soft {
+    animation: bounce-soft 2s infinite;
+  }
+  @keyframes bounce-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-12px) rotate(2deg); }
+  }
+  .pulse-ring {
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 1; }
+    75%, 100% { transform: scale(1.5); opacity: 0; }
+  }
+}
