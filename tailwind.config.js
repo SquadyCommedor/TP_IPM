@@ -8,32 +8,71 @@ export default {
     extend: {
       fontFamily: {
         body: ['Nunito', 'sans-serif'],
-        display: ['Fredoka', 'sans-serif'],
+        comic: ['Comic Neue', 'cursive'],
       },
       colors: {
-        primary: {
-          DEFAULT: '#FF8C42',
-          dark: '#E8732A',
+        // Cores suaves e calmantes para crianças com PEA
+        sky: {
+          50: '#E8F4F8',
+          100: '#D1E9F1',
+          200: '#A3D3E3',
+          300: '#5DADE2',
+          400: '#3498DB',
+          500: '#2980B9',
         },
-        secondary: {
-          DEFAULT: '#4ECDC4',
-          dark: '#3DBDB5',
+        mint: {
+          50: '#E8F8F0',
+          100: '#D1F1E1',
+          200: '#A3E3C3',
+          300: '#58D68D',
+          400: '#2ECC71',
+          500: '#27AE60',
         },
-        accent: {
-          DEFAULT: '#FFE66D',
-          dark: '#F0D750',
+        peach: {
+          50: '#FEF5E7',
+          100: '#FDEBD0',
+          200: '#FAD7A0',
+          300: '#F8C471',
+          400: '#F5B041',
+          500: '#E67E22',
         },
-        pink: '#FF6B9D',
-        purple: '#9B5DE5',
-        blue: '#00BBF9',
-        green: '#00F5D4',
-        red: '#FF6B6B',
-        bg: '#FFF8F0',
+        lavender: {
+          50: '#F4ECF7',
+          100: '#E8DAEF',
+          200: '#D2B4DE',
+          300: '#BB8FCE',
+          400: '#A569BD',
+          500: '#8E44AD',
+        },
+        coral: {
+          50: '#FADBD8',
+          100: '#F5B7B1',
+          200: '#F1948A',
+          300: '#EC7063',
+          400: '#E74C3C',
+          500: '#C0392B',
+        },
+        // Cores de estado
+        calm: '#58D68D',
+        warn: '#F8C471',
+        alert: '#EC7063',
+        // Cores de fundo
+        bg: '#E8F4F8',
         card: '#FFFFFF',
+        // Cores de texto
         text: {
-          DEFAULT: '#2D3436',
-          light: '#636E72',
+          DEFAULT: '#2C3E50',
+          light: '#5D6D7E',
+          muted: '#85929E',
         },
+      },
+      borderRadius: {
+        'kid': '24px',
+        'kid-lg': '32px',
+      },
+      boxShadow: {
+        'kid': '0 8px 32px rgba(93, 173, 226, 0.12)',
+        'kid-lg': '0 12px 48px rgba(93, 173, 226, 0.18)',
       },
     },
   },

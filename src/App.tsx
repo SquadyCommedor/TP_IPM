@@ -7,6 +7,7 @@ import MobileLayout from './components/MobileLayout';
 import DesktopLayout from './components/DesktopLayout';
 import LoginPage from './pages/LoginPage';
 import ChildDashboard from './pages/ChildDashboard';
+import StoryGamePage from './pages/StoryGamePage';
 import HomeModePage from './pages/HomeModePage';
 import SalonModePage from './pages/SalonModePage';
 import CharacterPage from './pages/CharacterPage';
@@ -37,6 +38,11 @@ function AppContent() {
         <Route path="/child" element={
           <ProtectedRoute allowedRole="child">
             <ChildDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/child/story-game" element={
+          <ProtectedRoute allowedRole="child">
+            <StoryGamePage />
           </ProtectedRoute>
         } />
         <Route path="/child/home-mode" element={
@@ -77,8 +83,8 @@ function App() {
             toastOptions={{
               duration: 3000,
               style: {
-                fontFamily: 'Nunito, sans-serif',
-                borderRadius: '16px',
+                fontFamily: 'Comic Neue, Nunito, sans-serif',
+                borderRadius: '20px',
                 padding: '16px 24px',
               },
             }}

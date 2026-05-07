@@ -1,36 +1,30 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { motion } from 'framer-motion';
 import { 
   Home, 
-  Scissors, 
+  BookOpen,
   Store, 
-  User, 
+  Sparkles, 
   LogOut,
-  Heart
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 export default function MobileNav() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, profile, logout } = useAuth();
+  const { user } = useAuth();
 
-  if (!user || !profile) return null;
+  if (!user) return null;
 
-  const isParent = profile.role === 'parent';
-
-  const navItems = isParent ? [
-    { path: '/parent', icon: Heart, label: 'Dashboard' },
-    { path: '/parent/profile', icon: User, label: 'Perfil' },
-  ] : [
+  const navItems = [
     { path: '/child', icon: Home, label: 'Início' },
-    { path: '/child/home-mode', icon: Scissors, label: 'Casa' },
+    { path: '/child/story-game', icon: BookOpen, label: 'História' },
     { path: '/child/salon-mode', icon: Store, label: 'Salão' },
-    { path: '/child/character', icon: User, label: 'Eu' },
+    { path: '/child/character', icon: Sparkles, label: 'Eu' },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 glass border-t border-gray-100 z-50 safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 glass border-t-2 border-sky-100 z-50 safe-bottom bg-white/95">
       <div className="flex items-center justify-around py-2 px-1">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
@@ -40,8 +34,8 @@ export default function MobileNav() {
             <motion.button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-colors ${
-                isActive ? 'text-primary' : 'text-text-light'
+              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-2xl transition-colors ${
+                isActive ? 'text-sky-500' : 'text-text-light'
               }`}
               whileTap={{ scale: 0.9 }}
             >
@@ -49,13 +43,13 @@ export default function MobileNav() {
                 animate={isActive ? { scale: [1, 1.2, 1] } : {}}
                 transition={{ duration: 0.3 }}
               >
-                <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
               </motion.div>
-              <span className="text-[10px] font-semibold">{item.label}</span>
+              <span className="text-[11px] font-bold font-comic">{item.label}</span>
               {isActive && (
                 <motion.div
                   layoutId="mobileNavIndicator"
-                  className="absolute -top-1 w-8 h-1 bg-primary rounded-full"
+                  className="absolute -top-1 w-8 h-1.5 bg-sky-400 rounded-full"
                 />
               )}
             </motion.button>
@@ -63,12 +57,12 @@ export default function MobileNav() {
         })}
 
         <motion.button
-          onClick={logout}
-          className="flex flex-col items-center gap-0.5 px-3 py-1 text-red-400"
+          onClick={() => { /* logout logic */ }}
+          className="flex flex-col items-center gap-1 px-3 py-2 text-coral-400"
           whileTap={{ scale: 0.9 }}
         >
-          <LogOut size={22} />
-          <span className="text-[10px] font-semibold">Sair</span>
+          <LogOut size={24} />
+          <span className="text-[11px] font-bold font-comic">Sair</span>
         </motion.button>
       </div>
     </nav>

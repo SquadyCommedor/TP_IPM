@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap');
 
 @layer base {
   * {
@@ -17,29 +17,29 @@
 
   body {
     font-family: 'Nunito', sans-serif;
-    background-color: #FFF8F0;
-    color: #2D3436;
+    background-color: #E8F4F8;
+    color: #2C3E50;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
-  /* Scrollbar personalizada */
+  /* Scrollbar suave */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: #E8F4F8;
   }
   ::-webkit-scrollbar-thumb {
-    background: #FF8C42;
+    background: #5DADE2;
     border-radius: 10px;
   }
 
-  /* Glass morphism */
+  /* Glass morphism suave */
   .glass {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }
@@ -50,7 +50,7 @@
   }
   .card-hover:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    box-shadow: 0 12px 24px rgba(93, 173, 226, 0.15);
   }
 
   /* Safe area para mobile */
@@ -58,40 +58,84 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  /* Animações */
+  /* Animações suaves para crianças com PEA */
   .animate-float {
-    animation: float 3s ease-in-out infinite;
+    animation: float 4s ease-in-out infinite;
   }
 
   .animate-pulse-soft {
-    animation: pulse-soft 2s ease-in-out infinite;
-  }
-
-  .animate-slide-up {
-    animation: slide-up 0.5s ease-out;
+    animation: pulse-soft 3s ease-in-out infinite;
   }
 
   .animate-bounce-soft {
-    animation: bounce-soft 2s ease-in-out infinite;
+    animation: bounce-soft 3s ease-in-out infinite;
+  }
+
+  .animate-wiggle {
+    animation: wiggle 2s ease-in-out infinite;
+  }
+
+  /* Estilo comic para títulos */
+  .font-comic {
+    font-family: 'Comic Neue', cursive;
+  }
+
+  /* Bordas arredondadas grandes para apelo infantil */
+  .rounded-kid {
+    border-radius: 24px;
+  }
+
+  /* Sombras suaves */
+  .shadow-kid {
+    box-shadow: 0 8px 32px rgba(93, 173, 226, 0.12);
+  }
+
+  /* Botões grandes e táteis */
+  .btn-kid {
+    @apply px-6 py-4 rounded-2xl font-bold text-lg transition-all;
+    min-height: 56px;
+  }
+
+  .btn-kid:active {
+    transform: scale(0.95);
   }
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-8px); }
 }
 
 @keyframes pulse-soft {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
 }
 
 @keyframes bounce-soft {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.6s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
 }
