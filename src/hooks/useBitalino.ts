@@ -1,95 +1,106 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
-import { useStore } from '../store';
-import { STRESS_THRESHOLD, STRESS_WARNING } from '../data';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { supabase } from '../lib/supabase';
 
-interface UseBitalinoReturn {
-  connected: boolean;
+interface BitalinoReading {
   heartRate: number;
-  stressLevel: number;
-  isHighStress: boolean;
-  isWarning: boolean;
-  connect: () => void;
-  disconnect: () => void;
-  simulate: (scenario: 'normal' | 'anxious' | 'calm') => void;
+  eda: number;
+  stressIndex: number;
+  timestamp: number;
 }
 
-export function useBitalino(): UseBitalinoReturn {
-  const [connected, setConnected] = useState(false);
-  const [heartRate, setHeartRate] = useState(80);
-  const [stressLevel, setStressLevel] = useState(20);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const updateGameState = useStore((s) => s.updateGameState);
-  const addBitalinoReading = useStore((s) => s.addBitalinoReading);
+interface UseBitalinoReturn {
+  isConnected: boolean;
+  isSimulating: boolean;
+  reading: BitalinoReading | null;
+  connect: () => Promise<void>;
+  disconnect: () => void;
+  startSimulation: () => void;
+  stopSimulation: () => void;
+  error: string | null;
+}
 
-  const generateReading = useCallback((baseHR: number, variance: number) => {
-    const hr = Math.round(baseHR + (Math.random() - 0.5) * variance);
-    const eda = Math.random() * 0.5 + 0.1;
-    const stressIndex = Math.min(100, Math.max(0,
-      ((hr - 60) / 100) * 60 + (eda / 0.6) * 40
-    ));
+export function useBitalino(childId?: string): UseBitalinoReturn {
+  const [isConnected, setIsConnected] = useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [reading, setReading] = useState<BitalinoReading | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const simInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    setHeartRate(hr);
-    setStressLevel(Math.round(stressIndex));
-
-    addBitalinoReading({
+  const generateSimulatedReading = (): BitalinoReading => {
+    const baseStress = Math.random() * 100;
+    return {
+      heartRate: Math.floor(60 + Math.random() * 40 + (baseStress > 70 ? 20 : 0)),
+      eda: parseFloat((0.5 + Math.random() * 2).toFixed(2)),
+      stressIndex: Math.floor(baseStress),
       timestamp: Date.now(),
-      heartRate: hr,
-      eda,
-      stressIndex,
-    });
+    };
+  };
 
-    updateGameState({ heartRate: hr, stressLevel: Math.round(stressIndex) });
-  }, [updateGameState, addBitalinoReading]);
+  const saveReading = useCallback(async (r: BitalinoReading) => {
+    if (!childId) return;
+    try {
+      await supabase.from('bitalino_readings').insert({
+        child_id: childId,
+        timestamp: r.timestamp,
+        heart_rate: r.heartRate,
+        eda: r.eda,
+        stress_index: r.stressIndex,
+      });
+    } catch (e) {
+      console.error('Erro ao guardar leitura:', e);
+    }
+  }, [childId]);
 
-  const connect = useCallback(() => {
-    setConnected(true);
-    updateGameState({ bitalinoConnected: true });
-
-    intervalRef.current = setInterval(() => {
-      generateReading(85, 10);
-    }, 2000);
-  }, [generateReading, updateGameState]);
+  const connect = useCallback(async () => {
+    setError(null);
+    try {
+      // Para integração real com Web Bluetooth:
+      // const device = await navigator.bluetooth.requestDevice({...})
+      // Por agora, iniciamos simulação automaticamente
+      startSimulation();
+      setIsConnected(true);
+    } catch (e) {
+      setError('Não foi possível conectar à pulseira. A usar modo simulação.');
+      startSimulation();
+    }
+  }, []);
 
   const disconnect = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+    stopSimulation();
+    setIsConnected(false);
+  }, []);
+
+  const startSimulation = useCallback(() => {
+    setIsSimulating(true);
+    simInterval.current = setInterval(() => {
+      const r = generateSimulatedReading();
+      setReading(r);
+      saveReading(r);
+    }, 2000);
+  }, [saveReading]);
+
+  const stopSimulation = useCallback(() => {
+    setIsSimulating(false);
+    if (simInterval.current) {
+      clearInterval(simInterval.current);
+      simInterval.current = null;
     }
-    setConnected(false);
-    updateGameState({ bitalinoConnected: false, stressLevel: 0, heartRate: 80 });
-  }, [updateGameState]);
-
-  const simulate = useCallback((scenario: 'normal' | 'anxious' | 'calm') => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
-    const configs = {
-      normal: { baseHR: 85, variance: 15 },
-      anxious: { baseHR: 120, variance: 25 },
-      calm: { baseHR: 65, variance: 5 },
-    };
-
-    const config = configs[scenario];
-    intervalRef.current = setInterval(() => {
-      generateReading(config.baseHR, config.variance);
-    }, 1500);
-  }, [generateReading]);
+  }, []);
 
   useEffect(() => {
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (simInterval.current) clearInterval(simInterval.current);
     };
   }, []);
 
   return {
-    connected,
-    heartRate,
-    stressLevel,
-    isHighStress: stressLevel >= STRESS_THRESHOLD,
-    isWarning: stressLevel >= STRESS_WARNING && stressLevel < STRESS_THRESHOLD,
+    isConnected,
+    isSimulating,
+    reading,
     connect,
     disconnect,
-    simulate,
+    startSimulation,
+    stopSimulation,
+    error,
   };
 }

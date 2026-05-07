@@ -1,51 +1,39 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { Suspense, lazy } from 'react';
-import { useAuth } from './AuthContext';
-import { useStore } from './store';
-import { LoadingScreen } from './components/LoadingScreen';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './AuthContext';
+import { Toaster } from 'react-hot-toast';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Lazy load pages for better performance
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const ChildDashboard = lazy(() => import('./pages/ChildDashboard'));
-const HomeModePage = lazy(() => import('./pages/HomeModePage'));
-const SalonModePage = lazy(() => import('./pages/SalonModePage'));
-const CharacterPage = lazy(() => import('./pages/CharacterPage'));
-const ParentDashboard = lazy(() => import('./pages/ParentDashboard'));
+import MobileLayout from './components/MobileLayout';
+import DesktopLayout from './components/DesktopLayout';
+import LoginPage from './pages/LoginPage';
+import ChildDashboard from './pages/ChildDashboard';
+import HomeModePage from './pages/HomeModePage';
+import SalonModePage from './pages/SalonModePage';
+import CharacterPage from './pages/CharacterPage';
+import ParentDashboard from './pages/ParentDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+import { useMediaQuery } from './hooks/useMediaQuery';
 
-function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode; allowedRole?: 'parent' | 'child' }) {
-  const isAuthenticated = useStore((s) => s.isAuthenticated);
-  const user = useStore((s) => s.user);
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      retry: 1,
+    },
+  },
+});
 
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-
-  if (allowedRole && user?.role !== allowedRole) {
-    return <Navigate to={user?.role === 'parent' ? '/parent' : '/child'} replace />;
-  }
-
-  return <>{children}</>;
-}
-
-function AppRoutes() {
-  const { isInitializing } = useAuth();
-  const location = useLocation();
-
-  // Show loading screen during initialization
-  if (isInitializing) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-        <LoadingScreen message="A preparar o teu guia..." submessage="A carregar a tua conta" />
-      </div>
-    );
-  }
+function AppContent() {
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const Layout = isMobile ? MobileLayout : DesktopLayout;
 
   return (
-    <Suspense fallback={<LoadingScreen message="A carregar..." />}>
-      <Routes location={location}>
-        <Route path="/" element={<LoginPage />} />
+    <Layout>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Child Routes */}
+        {/* Rotas Criança */}
         <Route path="/child" element={
           <ProtectedRoute allowedRole="child">
             <ChildDashboard />
@@ -67,25 +55,37 @@ function AppRoutes() {
           </ProtectedRoute>
         } />
 
-        {/* Parent Routes */}
+        {/* Rotas Pais */}
         <Route path="/parent" element={
           <ProtectedRoute allowedRole="parent">
             <ParentDashboard />
           </ProtectedRoute>
         } />
-
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Suspense>
+    </Layout>
   );
 }
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppContent />
+          <Toaster 
+            position="top-center"
+            toastOptions={{
+              duration: 3000,
+              style: {
+                fontFamily: 'Nunito, sans-serif',
+                borderRadius: '16px',
+                padding: '16px 24px',
+              },
+            }}
+          />
+        </BrowserRouter>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

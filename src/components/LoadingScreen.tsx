@@ -1,46 +1,38 @@
 import { motion } from 'framer-motion';
-import { Scissors, Heart, Loader2 } from 'lucide-react';
+import { Scissors } from 'lucide-react';
 
 interface LoadingScreenProps {
   message?: string;
-  submessage?: string;
 }
 
-export function LoadingScreen({ message = 'A carregar...', submessage }: LoadingScreenProps) {
+export default function LoadingScreen({ message = 'A carregar...' }: LoadingScreenProps) {
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="relative">
+    <div className="min-h-screen bg-bg flex flex-col items-center justify-center">
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        className="mb-6"
+      >
+        <div className="w-20 h-20 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-xl">
+          <Scissors className="text-white" size={36} />
+        </div>
+      </motion.div>
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-text-light font-semibold text-lg"
+      >
+        {message}
+      </motion.p>
+      <motion.div
+        className="mt-4 w-48 h-2 bg-gray-100 rounded-full overflow-hidden"
+      >
         <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-          className="text-primary"
-        >
-          <Scissors size={48} />
-        </motion.div>
-        <motion.div
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="absolute -top-1 -right-1 text-red-400"
-        >
-          <Heart size={20} fill="currentColor" />
-        </motion.div>
-      </div>
-      <div className="text-center">
-        <h2 className="text-xl font-bold text-gray-800">{message}</h2>
-        {submessage && (
-          <p className="text-sm text-gray-500 mt-1">{submessage}</p>
-        )}
-      </div>
-      <Loader2 className="animate-spin text-primary" size={24} />
-    </div>
-  );
-}
-
-export function InlineLoading({ message = 'A carregar...' }: { message?: string }) {
-  return (
-    <div className="flex items-center gap-2 text-gray-500">
-      <Loader2 className="animate-spin" size={16} />
-      <span className="text-sm">{message}</span>
+          className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
+          animate={{ x: ['-100%', '100%'] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </motion.div>
     </div>
   );
 }

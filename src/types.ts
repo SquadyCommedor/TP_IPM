@@ -1,93 +1,50 @@
-export type UserRole = 'parent' | 'child';
-
 export interface User {
   id: string;
-  name: string;
   email: string;
-  role: UserRole;
+  name: string;
+  role: 'parent' | 'child';
   avatar?: string;
-  childProfile?: ChildProfile;
-  createdAt: string;
 }
-
-export interface ChildProfile {
-  nickname: string;
-  age: number;
-  hairColor: HairColor;
-  characterSkin: CharacterSkin;
-  stars: number;
-  completedScenes: string[];
-  completedVisits: number;
-  diplomaEarned: boolean;
-}
-
-export type HairColor = 'dark' | 'brown' | 'blonde' | 'red' | 'black';
-export type CharacterSkin = 'boy1' | 'boy2' | 'girl1' | 'girl2' | 'neutral1' | 'neutral2';
 
 export interface Scene {
-  id: string;
+  id: number;
   title: string;
   description: string;
-  icon: string;
+  image: string;
+  tip: string;
   duration: number;
-  order: number;
-  tips: string[];
-  sounds: string[];
-  imagePrompt: string;
-}
-
-export interface GameState {
-  mode: 'home' | 'salon' | null;
-  currentScene: number;
-  isPaused: boolean;
-  stressLevel: number;
-  heartRate: number;
-  bitalinoConnected: boolean;
-  timerRemaining: number;
-  rewards: Reward[];
-}
-
-export interface Reward {
-  id: string;
-  type: 'star' | 'character' | 'diploma';
-  title: string;
-  description: string;
-  earnedAt: string;
-  icon: string;
-}
-
-export interface BreathingExercise {
-  id: string;
-  name: string;
-  description: string;
-  inhaleTime: number;
-  holdTime: number;
-  exhaleTime: number;
-  visual: 'balloon' | 'candle' | 'flower' | 'star';
-  color: string;
 }
 
 export interface VisitLog {
   id: string;
+  childId: string;
   date: string;
   duration: number;
   maxStress: number;
   avgStress: number;
   pauses: number;
   completed: boolean;
-  notes: string;
-}
-
-export interface AuthState {
-  user: User | null;
-  token: string | null;
-  isLoading: boolean;
-  error: string | null;
+  notes?: string;
 }
 
 export interface BitalinoReading {
+  childId: string;
   timestamp: number;
   heartRate: number;
   eda: number;
   stressIndex: number;
+}
+
+export interface Character {
+  id: number;
+  name: string;
+  image: string;
+  color: string;
+}
+
+export interface Reward {
+  id: string;
+  type: 'star' | 'award' | 'trophy' | 'medal';
+  label: string;
+  earnedAt: string;
 }

@@ -1,65 +1,52 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface UseTimerReturn {
-  timeRemaining: number;
+  seconds: number;
   isRunning: boolean;
-  progress: number;
-  start: (seconds: number) => void;
+  isPaused: boolean;
+  start: () => void;
   pause: () => void;
   resume: () => void;
   stop: () => void;
+  reset: () => void;
 }
 
 export function useTimer(): UseTimerReturn {
-  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [totalTime, setTotalTime] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const start = useCallback((seconds: number) => {
-    setTotalTime(seconds);
-    setTimeRemaining(seconds);
+  const start = useCallback(() => {
     setIsRunning(true);
-
-    if (intervalRef.current) clearInterval(intervalRef.current);
-
+    setIsPaused(false);
     intervalRef.current = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(intervalRef.current!);
-          setIsRunning(false);
-          return 0;
-        }
-        return prev - 1;
-      });
+      setSeconds(s => s + 1);
     }, 1000);
   }, []);
 
   const pause = useCallback(() => {
-    setIsRunning(false);
+    setIsPaused(true);
     if (intervalRef.current) clearInterval(intervalRef.current);
   }, []);
 
   const resume = useCallback(() => {
-    if (timeRemaining > 0 && !isRunning) {
-      setIsRunning(true);
-      intervalRef.current = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 1) {
-            clearInterval(intervalRef.current!);
-            setIsRunning(false);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-  }, [timeRemaining, isRunning]);
+    setIsPaused(false);
+    intervalRef.current = setInterval(() => {
+      setSeconds(s => s + 1);
+    }, 1000);
+  }, []);
 
   const stop = useCallback(() => {
     setIsRunning(false);
-    setTimeRemaining(0);
-    setTotalTime(0);
+    setIsPaused(false);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  }, []);
+
+  const reset = useCallback(() => {
+    setSeconds(0);
+    setIsRunning(false);
+    setIsPaused(false);
     if (intervalRef.current) clearInterval(intervalRef.current);
   }, []);
 
@@ -69,7 +56,5 @@ export function useTimer(): UseTimerReturn {
     };
   }, []);
 
-  const progress = totalTime > 0 ? ((totalTime - timeRemaining) / totalTime) * 100 : 0;
-
-  return { timeRemaining, isRunning, progress, start, pause, resume, stop };
+  return { seconds, isRunning, isPaused, start, pause, resume, stop, reset };
 }

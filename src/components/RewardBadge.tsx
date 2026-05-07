@@ -1,43 +1,61 @@
 import { motion } from 'framer-motion';
-import { Star, Award, Sparkles } from 'lucide-react';
-import type { Reward } from '../types';
+import { Star, Award, Trophy, Medal } from 'lucide-react';
 
 interface RewardBadgeProps {
-  reward: Reward;
-  size?: 'sm' | 'md' | 'lg';
-  showDetails?: boolean;
+  type: 'star' | 'award' | 'trophy' | 'medal';
+  label: string;
+  count?: number;
+  isNew?: boolean;
+  index?: number;
 }
 
-const typeConfig = {
-  star: { icon: Star, color: 'text-yellow-500', bg: 'bg-yellow-100', border: 'border-yellow-300' },
-  character: { icon: Sparkles, color: 'text-purple-500', bg: 'bg-purple-100', border: 'border-purple-300' },
-  diploma: { icon: Award, color: 'text-blue-500', bg: 'bg-blue-100', border: 'border-blue-300' },
+const iconMap = {
+  star: Star,
+  award: Award,
+  trophy: Trophy,
+  medal: Medal,
 };
 
-export function RewardBadge({ reward, size = 'md', showDetails = false }: RewardBadgeProps) {
-  const config = typeConfig[reward.type];
-  const Icon = config.icon;
+const colorMap = {
+  star: 'from-yellow-400 to-orange-400 text-yellow-500',
+  award: 'from-pink-400 to-purple-400 text-pink-500',
+  trophy: 'from-yellow-300 to-yellow-500 text-yellow-600',
+  medal: 'from-blue-400 to-secondary text-blue-500',
+};
 
-  const sizeClasses = {
-    sm: 'w-8 h-8',
-    md: 'w-12 h-12',
-    lg: 'w-20 h-20',
-  };
+export default function RewardBadge({ type, label, count, isNew, index = 0 }: RewardBadgeProps) {
+  const Icon = iconMap[type];
+  const colors = colorMap[type];
 
   return (
-    <div className="flex flex-col items-center">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+      transition={{ delay: index * 0.1, type: 'spring' }}
+      className={`relative flex flex-col items-center gap-1 p-3 rounded-2xl bg-gradient-to-br ${colors.split(' ').slice(0, 2).join(' ')} bg-opacity-10`}
+    >
       <motion.div
-        whileHover={{ scale: 1.1 }}
-        className={`${sizeClasses[size]} ${config.bg} ${config.border} border-2 rounded-full flex items-center justify-center`}
+        animate={isNew ? { rotate: [0, 10, -10, 0], scale: [1, 1.2, 1] } : {}}
+        transition={{ duration: 0.5 }}
+        className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colors.split(' ').slice(0, 2).join(' ')} flex items-center justify-center shadow-lg`}
       >
-        <Icon className={config.color} size={size === 'lg' ? 32 : size === 'md' ? 24 : 16} />
+        <Icon size={24} className="text-white" />
       </motion.div>
-      {showDetails && (
-        <div className="text-center mt-2">
-          <p className="font-bold text-sm">{reward.title}</p>
-          <p className="text-xs text-gray-500">{reward.description}</p>
-        </div>
+      <span className="text-xs font-bold text-text text-center">{label}</span>
+      {count !== undefined && (
+        <span className="text-[10px] bg-white/80 px-2 py-0.5 rounded-full font-bold text-text">
+          x{count}
+        </span>
       )}
-    </div>
+      {isNew && (
+        <motion.span
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+        >
+          NOVO
+        </motion.span>
+      )}
+    </motion.div>
   );
 }

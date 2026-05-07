@@ -1,176 +1,117 @@
-import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import type { BreathingExercise as BreathingExerciseType } from '../types';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Wind, X } from 'lucide-react';
 
 interface BreathingExerciseProps {
-  exercise: BreathingExerciseType;
-  onComplete: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  duration?: number;
 }
 
-export function BreathingExercise({ exercise, onComplete }: BreathingExerciseProps) {
-  const [phase, setPhase] = useState<'idle' | 'inhale' | 'hold' | 'exhale'>('idle');
+export default function BreathingExercise({ isOpen, onClose, duration = 60 }: BreathingExerciseProps) {
+  const [phase, setPhase] = useState<'inhale' | 'hold' | 'exhale' | 'rest'>('inhale');
+  const [timeLeft, setTimeLeft] = useState(duration);
   const [cycleCount, setCycleCount] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [completed, setCompleted] = useState(false);
-  const targetCycles = 3;
-
-  const runCycle = useCallback(async () => {
-    // Inhale
-    setPhase('inhale');
-    setProgress(0);
-    await animateProgress(exercise.inhaleTime);
-
-    if (exercise.holdTime > 0) {
-      setPhase('hold');
-      setProgress(0);
-      await animateProgress(exercise.holdTime);
-    }
-
-    // Exhale
-    setPhase('exhale');
-    setProgress(0);
-    await animateProgress(exercise.exhaleTime);
-
-    setCycleCount((prev) => {
-      const next = prev + 1;
-      if (next >= targetCycles) {
-        setCompleted(true);
-        setTimeout(onComplete, 1500);
-      } else {
-        runCycle();
-      }
-      return next;
-    });
-  }, [exercise, onComplete]);
-
-  const animateProgress = (duration: number): Promise<void> => {
-    return new Promise((resolve) => {
-      const start = Date.now();
-      const interval = setInterval(() => {
-        const elapsed = (Date.now() - start) / 1000;
-        const pct = Math.min(100, (elapsed / duration) * 100);
-        setProgress(pct);
-        if (pct >= 100) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, 50);
-    });
-  };
 
   useEffect(() => {
-    const timer = setTimeout(() => runCycle(), 500);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!isOpen) return;
 
-  const getPhaseText = () => {
-    switch (phase) {
-      case 'inhale': return 'Inspira...';
-      case 'hold': return 'Segura...';
-      case 'exhale': return 'Expira...';
-      default: return 'Prepara-te';
-    }
+    const phases: Array<'inhale' | 'hold' | 'exhale' | 'rest'> = ['inhale', 'hold', 'exhale', 'rest'];
+    let currentPhase = 0;
+
+    const interval = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) {
+          onClose();
+          return 0;
+        }
+        return t - 1;
+      });
+
+      currentPhase = (currentPhase + 1) % 4;
+      setPhase(phases[currentPhase]);
+      if (currentPhase === 0) setCycleCount(c => c + 1);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isOpen, duration, onClose]);
+
+  const phaseConfig = {
+    inhale: { text: 'Inspira...', scale: 1.5, color: 'from-secondary to-secondary-dark' },
+    hold: { text: 'Segura...', scale: 1.5, color: 'from-accent to-accent-dark' },
+    exhale: { text: 'Expira...', scale: 1, color: 'from-primary to-primary-dark' },
+    rest: { text: 'Descansa...', scale: 1, color: 'from-blue to-secondary' },
   };
 
-  const getPhaseColor = () => {
-    switch (phase) {
-      case 'inhale': return 'bg-accent';
-      case 'hold': return 'bg-secondary';
-      case 'exhale': return 'bg-primary';
-      default: return 'bg-gray-300';
-    }
-  };
-
-  const getVisualScale = () => {
-    switch (phase) {
-      case 'inhale': return 1.5;
-      case 'hold': return 1.5;
-      case 'exhale': return 0.6;
-      default: return 0.8;
-    }
-  };
-
-  const renderVisual = () => {
-    const commonProps = {
-      animate: { scale: getVisualScale() },
-      transition: {
-        duration: phase === 'idle' ? 0.5 :
-          phase === 'inhale' ? exercise.inhaleTime :
-          phase === 'hold' ? 0.3 :
-          exercise.exhaleTime,
-        ease: 'easeInOut'
-      }
-    };
-
-    switch (exercise.visual) {
-      case 'balloon':
-        return (
-          <motion.div {...commonProps} className="w-32 h-40 rounded-full bg-yellow-400 border-4 border-yellow-500" />
-        );
-      case 'candle':
-        return (
-          <div className="flex flex-col items-center">
-            <motion.div {...commonProps} className="w-4 h-12 bg-orange-400 rounded-t-full" />
-            <div className="w-8 h-12 bg-red-200 rounded-sm mt-1" />
-          </div>
-        );
-      case 'flower':
-        return (
-          <motion.div {...commonProps} className="text-6xl">
-            🌸
-          </motion.div>
-        );
-      case 'star':
-        return (
-          <motion.div {...commonProps} className="text-6xl">
-            ⭐
-          </motion.div>
-        );
-    }
-  };
+  const config = phaseConfig[phase];
 
   return (
-    <div className="flex flex-col items-center gap-6 p-6">
-      {completed ? (
+    <AnimatePresence>
+      {isOpen && (
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
         >
-          <h3 className="text-2xl font-bold text-green-600">Muito bem!</h3>
-          <p className="text-gray-600 mt-2">Já estás mais calmo. Vamos continuar?</p>
-        </motion.div>
-      ) : (
-        <>
-          <h3 className="text-xl font-bold">{exercise.name}</h3>
-          <p className="text-sm text-gray-600 text-center">{exercise.description}</p>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative"
+          >
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+            >
+              <X size={18} />
+            </button>
 
-          <div className="h-40 flex items-center justify-center">
-            {renderVisual()}
-          </div>
+            <div className="text-center mb-6">
+              <Wind className="mx-auto mb-3 text-secondary" size={32} />
+              <h2 className="font-display font-bold text-2xl text-text">Exercício de Respiração</h2>
+              <p className="text-text-light text-sm mt-1">Segue o círculo para te acalmares</p>
+            </div>
 
-          <div className="w-full max-w-xs">
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            {/* Círculo animado */}
+            <div className="flex justify-center mb-6">
               <motion.div
-                className={`h-full ${getPhaseColor()}`}
-                style={{ width: `${progress}%` }}
+                animate={{ scale: config.scale }}
+                transition={{ duration: 4, ease: 'easeInOut' }}
+                className={`w-40 h-40 rounded-full bg-gradient-to-br ${config.color} flex items-center justify-center shadow-xl`}
+              >
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                  className="w-32 h-32 rounded-full border-4 border-white/30"
+                />
+              </motion.div>
+            </div>
+
+            <motion.p
+              key={phase}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center font-bold text-xl text-text mb-4"
+            >
+              {config.text}
+            </motion.p>
+
+            <div className="flex justify-between text-sm text-text-light">
+              <span>Ciclos: {cycleCount}</span>
+              <span>{timeLeft}s restantes</span>
+            </div>
+
+            <div className="mt-4 w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+              <motion.div
+                className="h-full bg-secondary rounded-full"
+                initial={{ width: '100%' }}
+                animate={{ width: `${(timeLeft / duration) * 100}%` }}
               />
             </div>
-            <p className="text-center mt-2 font-medium">{getPhaseText()}</p>
-          </div>
-
-          <div className="flex gap-2">
-            {Array.from({ length: targetCycles }).map((_, i) => (
-              <div
-                key={i}
-                className={`w-3 h-3 rounded-full ${
-                  i < cycleCount ? 'bg-green-500' : 'bg-gray-300'
-                }`}
-              />
-            ))}
-          </div>
-        </>
+          </motion.div>
+        </motion.div>
       )}
-    </div>
+    </AnimatePresence>
   );
 }

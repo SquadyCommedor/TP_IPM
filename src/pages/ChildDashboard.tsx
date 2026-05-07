@@ -1,186 +1,207 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 import { motion } from 'framer-motion';
-import { Home, Store, User, Star, Award, Gift, Settings } from 'lucide-react';
-import { useStore } from '../store';
-import { CharacterAvatar } from '../components/CharacterAvatar';
+import {
+  Scissors,
+  Home,
+  Store,
+  Sparkles,
+  Star,
+  Trophy,
+  Heart,
+  ArrowRight,
+  Zap,
+  Calendar,
+} from 'lucide-react';
+import RewardBadge from '../components/RewardBadge';
+
+const quickActions = [
+  {
+    title: 'Modo Casa',
+    description: 'Pratica em casa com a história animada',
+    icon: Home,
+    path: '/child/home-mode',
+    color: 'from-secondary to-secondary-dark',
+    bgColor: 'bg-secondary/10',
+    image: 'https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=400&h=300&fit=crop',
+  },
+  {
+    title: 'Modo Salão',
+    description: 'Acompanha a visita ao cabeleireiro',
+    icon: Store,
+    path: '/child/salon-mode',
+    color: 'from-purple to-pink-500',
+    bgColor: 'bg-purple/10',
+    image: 'https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=400&h=300&fit=crop',
+  },
+  {
+    title: 'O Meu Avatar',
+    description: 'Personaliza o teu personagem',
+    icon: Sparkles,
+    path: '/child/character',
+    color: 'from-accent to-accent-dark',
+    bgColor: 'bg-accent/10',
+    image: 'https://images.unsplash.com/photo-1515041219749-89347f83291a?w=400&h=300&fit=crop',
+  },
+];
+
+const recentRewards = [
+  { type: 'star' as const, label: 'Primeira Cena', count: 3 },
+  { type: 'award' as const, label: 'Corajoso', count: 1 },
+  { type: 'trophy' as const, label: 'Visitante', count: 2 },
+];
 
 export default function ChildDashboard() {
   const navigate = useNavigate();
-  const user = useStore((s) => s.user);
-  const syncVisitLogs = useStore((s) => s.syncVisitLogs);
-  const [showRewards, setShowRewards] = useState(false);
-
-  useEffect(() => {
-    // Sync visit logs from Supabase on mount
-    syncVisitLogs();
-  }, [syncVisitLogs]);
-
-  const profile = user?.childProfile;
-  const stars = profile?.stars || 0;
-  const completedVisits = profile?.completedVisits || 0;
-  const hasDiploma = profile?.diplomaEarned || false;
+  const { profile } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
-      <div className="max-w-md mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <CharacterAvatar
-              skin={profile?.characterSkin || 'neutral1'}
-              hairColor={profile?.hairColor || 'brown'}
-              size="sm"
-            />
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">
-                Olá, {profile?.nickname || user?.name}!
-              </h1>
-              <div className="flex items-center gap-1 text-yellow-500">
-                <Star size={16} fill="currentColor" />
-                <span className="text-sm font-bold">{stars}</span>
-                <span className="text-xs text-gray-500">estrelas</span>
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => navigate('/child/character')}
-            className="p-2 bg-white rounded-xl border-2 border-gray-200 hover:border-primary transition-colors"
-          >
-            <Settings size={20} className="text-gray-600" />
-          </button>
-        </div>
-
-        {/* Welcome Hero */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-3xl p-6 mb-6 shadow-sm border-2 border-gray-100"
-        >
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            Pronto para o cabeleireiro?
-          </h2>
-          <p className="text-gray-600 mb-4">
-            Vamos aprender tudo sobre ir ao cabeleireiro de forma divertida!
-          </p>
-
-          <div className="grid grid-cols-2 gap-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/child/home-mode')}
-              className="flex items-center justify-center gap-2 px-4 py-4 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/30 hover:shadow-xl transition-shadow"
-            >
-              <Home size={20} />
-              <div className="text-left">
-                <div className="text-sm">Modo Casa</div>
-                <div className="text-xs opacity-80">Preparar</div>
-              </div>
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate('/child/salon-mode')}
-              className="flex items-center justify-center gap-2 px-4 py-4 bg-secondary text-white rounded-2xl font-bold shadow-lg shadow-secondary/30 hover:shadow-xl transition-shadow"
-            >
-              <Store size={20} />
-              <div className="text-left">
-                <div className="text-sm">Modo Salão</div>
-                <div className="text-xs opacity-80">Ir agora</div>
-              </div>
-            </motion.button>
-          </div>
-        </motion.div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-white rounded-2xl p-4 text-center border-2 border-gray-100">
-            <div className="text-2xl mb-1">⭐</div>
-            <div className="text-xl font-bold text-gray-800">{stars}</div>
-            <div className="text-xs text-gray-500">Estrelas</div>
-          </div>
-          <div className="bg-white rounded-2xl p-4 text-center border-2 border-gray-100">
-            <div className="text-2xl mb-1">✂️</div>
-            <div className="text-xl font-bold text-gray-800">{completedVisits}</div>
-            <div className="text-xs text-gray-500">Visitas</div>
-          </div>
-          <div className="bg-white rounded-2xl p-4 text-center border-2 border-gray-100">
-            <div className="text-2xl mb-1">{hasDiploma ? '🎓' : '🔒'}</div>
-            <div className="text-xl font-bold text-gray-800">{hasDiploma ? 'Sim' : 'Não'}</div>
-            <div className="text-xs text-gray-500">Diploma</div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white rounded-3xl p-4 border-2 border-gray-100">
-          <h3 className="font-bold text-gray-800 mb-3">O que queres fazer?</h3>
-
-          <button
-            onClick={() => setShowRewards(!showRewards)}
-            className="w-full flex items-center justify-between p-4 bg-yellow-50 rounded-2xl border-2 border-yellow-200 hover:border-yellow-300 transition-colors mb-2"
-          >
-            <div className="flex items-center gap-3">
-              <Gift size={24} className="text-yellow-600" />
-              <div className="text-left">
-                <p className="font-bold text-gray-800">As Minhas Recompensas</p>
-                <p className="text-xs text-gray-500">Ver estrelas e conquistas</p>
-              </div>
-            </div>
-            <Star size={20} className="text-yellow-500" />
-          </button>
-
-          <button
-            onClick={() => navigate('/child/character')}
-            className="w-full flex items-center justify-between p-4 bg-purple-50 rounded-2xl border-2 border-purple-200 hover:border-purple-300 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <User size={24} className="text-purple-600" />
-              <div className="text-left">
-                <p className="font-bold text-gray-800">O Meu Personagem</p>
-                <p className="text-xs text-gray-500">Mudar aspeto e cor do cabelo</p>
-              </div>
-            </div>
-            <Settings size={20} className="text-purple-500" />
-          </button>
-        </div>
-
-        {/* Rewards Panel */}
-        {showRewards && (
+    <div className="min-h-screen p-4 md:p-8">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8"
+      >
+        <div className="flex items-center gap-4 mb-2">
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="mt-4 bg-white rounded-3xl p-6 border-2 border-yellow-200"
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg"
           >
-            <h4 className="font-bold text-gray-800 mb-4">As Minhas Conquistas</h4>
-            <div className="grid grid-cols-5 gap-2">
-              {Array.from({ length: Math.max(5, stars) }).map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="aspect-square bg-yellow-100 rounded-xl flex items-center justify-center"
-                >
-                  <Star size={20} className="text-yellow-500" fill="currentColor" />
-                </motion.div>
-              ))}
-            </div>
-
-            {hasDiploma && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-4 p-4 bg-blue-100 rounded-2xl text-center"
-              >
-                <Award size={32} className="text-blue-600 mx-auto mb-2" />
-                <p className="font-bold text-blue-800">Diploma do Cabeleireiro!</p>
-                <p className="text-sm text-blue-600">Parabéns, és um verdadeiro campeão!</p>
-              </motion.div>
-            )}
+            <Scissors size={28} className="text-white" />
           </motion.div>
-        )}
+          <div>
+            <h1 className="font-display font-bold text-2xl md:text-3xl text-text">
+              Olá, {profile?.name || 'Amigo'}! 👋
+            </h1>
+            <p className="text-text-light text-sm md:text-base">
+              Pronto para uma nova aventura no cabeleireiro?
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+        {[
+          { icon: Star, label: 'Estrelas', value: '12', color: 'text-yellow-500', bg: 'bg-yellow-50' },
+          { icon: Trophy, label: 'Visitas', value: '3', color: 'text-primary', bg: 'bg-orange-50' },
+          { icon: Zap, label: 'Cenas', value: '5/7', color: 'text-secondary', bg: 'bg-teal-50' },
+          { icon: Calendar, label: 'Dias', value: '7', color: 'text-purple', bg: 'bg-purple-50' },
+        ].map((stat, i) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className={`${stat.bg} rounded-2xl p-4 text-center`}
+          >
+            <stat.icon size={24} className={`mx-auto mb-2 ${stat.color}`} />
+            <p className="font-black text-2xl text-text">{stat.value}</p>
+            <p className="text-xs text-text-light font-semibold">{stat.label}</p>
+          </motion.div>
+        ))}
       </div>
+
+      {/* Quick Actions */}
+      <div className="mb-8">
+        <h2 className="font-display font-bold text-xl text-text mb-4 flex items-center gap-2">
+          <Sparkles size={20} className="text-primary" />
+          O que queres fazer?
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {quickActions.map((action, i) => (
+            <motion.button
+              key={action.path}
+              onClick={() => navigate(action.path)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + i * 0.1 }}
+              whileHover={{ y: -4 }}
+              whileTap={{ scale: 0.97 }}
+              className="relative overflow-hidden rounded-2xl bg-white shadow-lg text-left group"
+            >
+              {/* Imagem de fundo */}
+              <div className="relative h-40 overflow-hidden">
+                <img
+                  src={action.image}
+                  alt={action.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
+                />
+                <div className={`absolute inset-0 bg-gradient-to-t ${action.color} opacity-60`} />
+                <div className="absolute bottom-3 left-4 right-4">
+                  <div className={`w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-2`}>
+                    <action.icon size={20} className="text-white" />
+                  </div>
+                  <h3 className="font-display font-bold text-xl text-white">{action.title}</h3>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <p className="text-sm text-text-light mb-3">{action.description}</p>
+                <div className="flex items-center gap-1 text-primary font-semibold text-sm">
+                  Começar
+                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                </div>
+              </div>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Recompensas Recentes */}
+      <div className="mb-8">
+        <h2 className="font-display font-bold text-xl text-text mb-4 flex items-center gap-2">
+          <Trophy size={20} className="text-accent-dark" />
+          As Tuas Recompensas
+        </h2>
+
+        <div className="bg-white rounded-2xl p-5 shadow-lg">
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            {recentRewards.map((reward, i) => (
+              <RewardBadge
+                key={reward.label}
+                type={reward.type}
+                label={reward.label}
+                count={reward.count}
+                index={i}
+              />
+            ))}
+
+            {/* Placeholder para mais recompensas */}
+            <div className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-gray-50 min-w-[80px]">
+              <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
+                <Heart size={20} className="text-gray-300" />
+              </div>
+              <span className="text-xs text-gray-400 font-semibold text-center">Mais em breve</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Dica do dia */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8 }}
+        className="bg-gradient-to-r from-secondary/10 to-blue-50 rounded-2xl p-5 border border-secondary/20"
+      >
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center flex-shrink-0">
+            <Zap size={20} className="text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-text mb-1">Dica do Dia 💡</h3>
+            <p className="text-sm text-text-light">
+              Antes de ir ao cabeleireiro, pede aos teus pais para te mostrarem fotos de cortes de cabelo 
+              que gostes. Assim, o cabeleireiro sabe exatamente o que queres!
+            </p>
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }

@@ -1,92 +1,145 @@
-import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Activity, AlertTriangle } from 'lucide-react';
 import { useBitalino } from '../hooks/useBitalino';
-import { STRESS_THRESHOLD, STRESS_WARNING } from '../data';
 
 interface StressMonitorProps {
+  childId: string;
   onHighStress?: () => void;
-  onWarning?: () => void;
+  threshold?: number;
 }
 
-export function StressMonitor({ onHighStress, onWarning }: StressMonitorProps) {
-  const { connected, heartRate, stressLevel, isHighStress, isWarning } = useBitalino();
+export default function StressMonitor({ childId, onHighStress, threshold = 70 }: StressMonitorProps) {
+  const { reading, isConnected, connect, error } = useBitalino(childId);
 
-  useEffect(() => {
-    if (isHighStress && onHighStress) {
-      onHighStress();
-    } else if (isWarning && onWarning) {
-      onWarning();
-    }
-  }, [isHighStress, isWarning, onHighStress, onWarning]);
+  const stressLevel = reading?.stressIndex ?? 0;
+  const isHighStress = stressLevel > threshold;
 
-  const getStressColor = () => {
-    if (stressLevel >= STRESS_THRESHOLD) return 'text-red-500';
-    if (stressLevel >= STRESS_WARNING) return 'text-yellow-500';
-    return 'text-green-500';
+  if (isHighStress && onHighStress) {
+    onHighStress();
+  }
+
+  const getStressColor = (level: number) => {
+    if (level < 30) return 'text-green-500';
+    if (level < 50) return 'text-yellow-500';
+    if (level < 70) return 'text-orange-500';
+    return 'text-red-500';
   };
 
-  const getStressBg = () => {
-    if (stressLevel >= STRESS_THRESHOLD) return 'bg-red-100 border-red-300';
-    if (stressLevel >= STRESS_WARNING) return 'bg-yellow-100 border-yellow-300';
-    return 'bg-green-100 border-green-300';
+  const getStressBg = (level: number) => {
+    if (level < 30) return 'from-green-400 to-green-500';
+    if (level < 50) return 'from-yellow-400 to-yellow-500';
+    if (level < 70) return 'from-orange-400 to-orange-500';
+    return 'from-red-400 to-red-500';
+  };
+
+  const getStressLabel = (level: number) => {
+    if (level < 30) return 'Muito Calmo';
+    if (level < 50) return 'Calmo';
+    if (level < 70) return 'Ansioso';
+    return 'Muito Ansioso';
   };
 
   return (
-    <div className={`p-4 rounded-2xl border-2 ${getStressBg()} transition-colors`}>
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-white rounded-2xl p-5 shadow-lg">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Activity className={getStressColor()} size={20} />
-          <span className="font-bold text-gray-800">Monitor de Stress</span>
-        </div>
-        <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${
-          connected ? 'bg-green-200 text-green-700' : 'bg-gray-200 text-gray-500'
-        }`}>
-          <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
-          {connected ? 'Ligado' : 'Desligado'}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-1 mb-1">
-            <Heart className="text-red-400" size={16} />
-            <span className="text-2xl font-bold text-gray-800">{heartRate}</span>
+          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getStressBg(stressLevel)} flex items-center justify-center`}>
+            <Activity size={20} className="text-white" />
           </div>
-          <p className="text-xs text-gray-500">BPM</p>
+          <div>
+            <h3 className="font-bold text-text">Monitor de Stress</h3>
+            <p className="text-xs text-text-light">BITalino em tempo real</p>
+          </div>
         </div>
 
-        <div className="text-center">
-          <motion.div
-            animate={{ scale: stressLevel > STRESS_WARNING ? [1, 1.1, 1] : 1 }}
-            transition={{ duration: 1, repeat: stressLevel > STRESS_WARNING ? Infinity : 0 }}
+        {!isConnected ? (
+          <motion.button
+            onClick={connect}
+            whileTap={{ scale: 0.95 }}
+            className="px-4 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary-dark transition-colors"
           >
-            <span className={`text-2xl font-bold ${getStressColor()}`}>{stressLevel}%</span>
-          </motion.div>
-          <p className="text-xs text-gray-500">Stress</p>
-        </div>
+            Ligar
+          </motion.button>
+        ) : (
+          <div className="flex items-center gap-1.5">
+            <motion.div
+              animate={{ scale: [1, 1.3, 1] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+              className="w-2.5 h-2.5 bg-green-500 rounded-full"
+            />
+            <span className="text-xs text-green-600 font-semibold">Ligado</span>
+          </div>
+        )}
       </div>
 
-      {isHighStress && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-3 flex items-center gap-2 p-2 bg-red-200 rounded-xl"
-        >
-          <AlertTriangle className="text-red-600" size={16} />
-          <span className="text-sm font-bold text-red-700">Stress elevado! Vamos respirar juntos?</span>
-        </motion.div>
+      {error && (
+        <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-xl flex items-center gap-2 text-sm text-yellow-700">
+          <AlertTriangle size={16} />
+          {error}
+        </div>
       )}
 
-      {isWarning && !isHighStress && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-3 flex items-center gap-2 p-2 bg-yellow-200 rounded-xl"
-        >
-          <AlertTriangle className="text-yellow-600" size={16} />
-          <span className="text-sm font-bold text-yellow-700">Atenção: stress a aumentar</span>
-        </motion.div>
+      {reading && (
+        <div className="space-y-4">
+          {/* Gauge de stress */}
+          <div className="relative">
+            <div className="flex justify-between items-end mb-2">
+              <span className={`text-3xl font-black ${getStressColor(stressLevel)}`}>
+                {stressLevel}%
+              </span>
+              <span className="text-sm font-semibold text-text-light">
+                {getStressLabel(stressLevel)}
+              </span>
+            </div>
+
+            <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
+              <motion.div
+                className={`h-full rounded-full bg-gradient-to-r ${getStressBg(stressLevel)}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${stressLevel}%` }}
+                transition={{ duration: 0.5 }}
+              />
+            </div>
+
+            {/* Marcadores */}
+            <div className="flex justify-between mt-1 text-[10px] text-text-light">
+              <span>Calmo</span>
+              <span>Moderado</span>
+              <span>Ansioso</span>
+            </div>
+          </div>
+
+          {/* Métricas */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-3">
+              <Heart size={18} className="text-red-400" />
+              <div>
+                <p className="text-xs text-text-light">Batimento</p>
+                <p className="font-bold text-text">{reading.heartRate} BPM</p>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-3">
+              <Activity size={18} className="text-secondary" />
+              <div>
+                <p className="text-xs text-text-light">EDA</p>
+                <p className="font-bold text-text">{reading.eda.toFixed(2)} μS</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!reading && isConnected && (
+        <div className="text-center py-8 text-text-light">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+            className="mx-auto mb-3"
+          >
+            <Activity size={32} className="text-primary" />
+          </motion.div>
+          <p className="font-semibold">A receber dados...</p>
+        </div>
       )}
     </div>
   );
