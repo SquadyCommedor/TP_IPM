@@ -1,66 +1,52 @@
 import { motion } from 'framer-motion';
-import { Clock, Volume2, Lightbulb, CheckCircle, Circle } from 'lucide-react';
 import type { Scene } from '../types';
-import { useStore } from '../store';
 
 interface SceneCardProps {
   scene: Scene;
-  index: number;
   isActive: boolean;
   isCompleted: boolean;
   onClick: () => void;
 }
 
-export function SceneCard({ scene, index, isActive, isCompleted, onClick }: SceneCardProps) {
-  const completedScenes = useStore((s) => s.user?.childProfile?.completedScenes || []);
+export function SceneCard({ scene, isActive, isCompleted, onClick }: SceneCardProps) {
+  const getIcon = () => {
+    switch (scene.icon) {
+      case 'DoorOpen': return '🚪';
+      case 'Shirt': return '🦸';
+      case 'Droplets': return '💧';
+      case 'Scissors': return '✂️';
+      case 'Wind': return '💨';
+      case 'Sparkles': return '✨';
+      case 'Mirror': return '🪞';
+      default: return '⭐';
+    }
+  };
 
   return (
     <motion.button
-      onClick={onClick}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className={`w-full text-left rounded-2xl border-2 p-4 transition-all ${
+      onClick={onClick}
+      className={`w-full p-4 rounded-2xl border-2 text-left transition-colors ${
         isActive 
-          ? 'border-primary bg-primary/5 shadow-lg' 
-          : isCompleted
-            ? 'border-accent/50 bg-accent/5'
-            : 'border-gray-200 bg-white hover:border-primary/30'
+          ? 'border-primary bg-primary/5' 
+          : isCompleted 
+            ? 'border-green-300 bg-green-50' 
+            : 'border-gray-200 bg-white hover:border-gray-300'
       }`}
     >
-      <div className="flex items-start gap-3">
-        <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold ${
-          isActive ? 'bg-primary text-white' : isCompleted ? 'bg-accent text-white' : 'bg-gray-100 text-gray-500'
-        }`}>
-          {isCompleted ? <CheckCircle className="w-5 h-5" /> : index + 1}
+      <div className="flex items-center gap-3">
+        <span className="text-2xl">{getIcon()}</span>
+        <div className="flex-1">
+          <h3 className={`font-bold ${isCompleted ? 'text-green-700' : 'text-gray-800'}`}>
+            {scene.title}
+            {isCompleted && <span className="ml-2 text-green-500">✓</span>}
+          </h3>
+          <p className="text-sm text-gray-500">{Math.floor(scene.duration / 60)} min</p>
         </div>
-
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-gray-800 text-sm mb-1">{scene.title}</h3>
-          <p className="text-xs text-gray-500 line-clamp-2 mb-2">{scene.description}</p>
-
-          <div className="flex items-center gap-3 text-xs text-gray-400">
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {Math.floor(scene.duration / 60)}:{(scene.duration % 60).toString().padStart(2, '0')}
-            </span>
-            <span className="flex items-center gap-1">
-              <Volume2 className="w-3 h-3" />
-              {scene.sounds.length}
-            </span>
-            <span className="flex items-center gap-1">
-              <Lightbulb className="w-3 h-3" />
-              {scene.tips.length}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex-shrink-0">
-          {isCompleted ? (
-            <CheckCircle className="w-5 h-5 text-accent" />
-          ) : (
-            <Circle className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-gray-300'}`} />
-          )}
-        </div>
+        <div className={`w-3 h-3 rounded-full ${
+          isActive ? 'bg-primary' : isCompleted ? 'bg-green-400' : 'bg-gray-300'
+        }`} />
       </div>
     </motion.button>
   );

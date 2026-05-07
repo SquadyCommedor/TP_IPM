@@ -29,7 +29,7 @@ export interface Scene {
   title: string;
   description: string;
   icon: string;
-  duration: number; // seconds
+  duration: number;
   order: number;
   tips: string[];
   sounds: string[];
@@ -40,7 +40,7 @@ export interface GameState {
   mode: 'home' | 'salon' | null;
   currentScene: number;
   isPaused: boolean;
-  stressLevel: number; // 0-100
+  stressLevel: number;
   heartRate: number;
   bitalinoConnected: boolean;
   timerRemaining: number;
@@ -88,6 +88,6 @@ export interface AuthState {
 export interface BitalinoReading {
   timestamp: number;
   heartRate: number;
-  eda: number; // electrodermal activity
+  eda: number;
   stressIndex: number;
 }

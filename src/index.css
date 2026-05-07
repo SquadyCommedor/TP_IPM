@@ -1,58 +1,101 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #4F46E5;
+  --color-primary: #6366F1;
   --color-primary-light: #818CF8;
-  --color-primary-dark: #3730A3;
-  --color-secondary: #F59E0B;
-  --color-secondary-light: #FCD34D;
-  --color-accent: #10B981;
-  --color-accent-light: #6EE7B7;
+  --color-primary-dark: #4F46E5;
+  --color-secondary: #EC4899;
+  --color-secondary-light: #F472B6;
+  --color-accent: #F59E0B;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
   --color-danger: #EF4444;
-  --color-danger-light: #FCA5A5;
-  --color-kid-bg: #FFF7ED;
-  --color-kid-card: #FFFBF5;
-  --color-parent-bg: #F0F4FF;
-  --color-parent-card: #FFFFFF;
-  --color-hair-dark: #3E2723;
-  --color-hair-brown: #6D4C41;
-  --color-hair-blonde: #F9D71C;
-  --color-hair-red: #C62828;
-  --color-hair-black: #212121;
-  --font-family-display: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
-  --font-family-body: 'Segoe UI', system-ui, sans-serif;
+  --color-info: #3B82F6;
+  --color-background: #F0F4F8;
+  --color-surface: #FFFFFF;
+  --color-text-primary: #1E293B;
+  --color-text-secondary: #64748B;
+  --color-border: #E2E8F0;
 }
 
 @layer base {
   body {
-    font-family: var(--font-family-body);
-    -webkit-font-smoothing: antialiased;
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+    color: var(--color-text-primary);
+    background: linear-gradient(135deg, #E0F2FE 0%, #F0E9FF 100%);
+    min-height: 100vh;
   }
 }
 
-@layer utilities {
-  .text-shadow-kid {
-    text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+@layer components {
+  .card {
+    background: var(--color-surface);
+    border-radius: 24px;
+    border: 2px solid var(--color-border);
+    padding: 20px;
   }
-  .bounce-soft {
-    animation: bounce-soft 2s infinite;
+
+  .btn-primary {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 12px 24px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    transition: all 0.2s ease;
   }
-  @keyframes bounce-soft {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+
+  .btn-primary:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
   }
-  .float {
-    animation: float 3s ease-in-out infinite;
+
+  .btn-primary:active {
+    transform: scale(0.98);
   }
-  @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-12px) rotate(2deg); }
+
+  .btn-secondary {
+    background: white;
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
+    border-radius: 16px;
+    padding: 12px 24px;
+    font-weight: 700;
+    transition: all 0.2s ease;
   }
-  .pulse-ring {
-    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  .input-field {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px 0 44px;
+    border-radius: 12px;
+    border: 2px solid var(--color-border);
+    background: white;
+    font-size: 16px;
+    transition: all 0.2s ease;
   }
-  @keyframes pulse-ring {
-    0% { transform: scale(1); opacity: 1; }
-    75%, 100% { transform: scale(1.5); opacity: 0; }
+
+  .input-field:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-light);
   }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
 }

@@ -1,7 +1,7 @@
 {
   "name": "meu-guia-cabeleireiro",
-  "version": "1.0.0",
-  "description": "O Meu Guia do Cabeleireiro - App para crian\u00e7as com PEA",
+  "version": "2.0.0",
+  "description": "O Meu Guia do Cabeleireiro - App para crianças com PEA (Supabase Edition)",
   "private": true,
   "type": "module",
   "scripts": {

@@ -161,8 +161,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (authError) {
-        throw new Error(authError.message === 'Invalid login credentials' 
-          ? 'Email ou palavra-passe incorretos' 
+        throw new Error(authError.message === 'Invalid login credentials'
+          ? 'Email ou palavra-passe incorretos'
           : authError.message);
       }
 
@@ -217,7 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // Step 1: Sign up
+      // Step 1: Sign up with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -242,70 +242,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       console.log('✅ Auth user created:', authData.user.id);
 
-      // Step 2: CRITICAL FIX - Sign in immediately after signUp to get authenticated session
-      // This ensures the subsequent INSERT has a valid auth.uid()
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
-
-      if (signInError) {
-        console.error('Auto-signin after signup failed:', signInError);
-        // Don't throw here, try to insert anyway - the session might be established
-      } else {
-        console.log('✅ Auto-signed in after signup');
-      }
-
-      // Step 3: Create profile with retry logic
-      let profileError = null;
-      let retries = 0;
-      const maxRetries = 3;
-
-      while (retries < maxRetries) {
-        const { error } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            name: data.name,
-            email: data.email,
-            role: data.role,
-            child_profile: data.role === 'child' ? {
-              nickname: data.childNickname || data.name,
-              age: data.childAge || 7,
-              hair_color: 'brown',
-              character_skin: 'neutral1',
-              stars: 0,
-              completed_scenes: [],
-              completed_visits: 0,
-              diploma_earned: false,
-            } : null,
-            parent_email: data.parentEmail || null,
-          });
-
-        if (!error) {
-          profileError = null;
-          break;
-        }
-
-        profileError = error;
-        retries++;
-        console.warn(`Profile creation attempt ${retries} failed:`, error.message);
-
-        if (retries < maxRetries) {
-          await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
-        }
-      }
+      // Step 2: Create profile in Supabase database
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          name: data.name,
+          email: data.email,
+          role: data.role,
+          child_profile: data.role === 'child' ? {
+            nickname: data.childNickname || data.name,
+            age: data.childAge || 7,
+            hair_color: 'brown',
+            character_skin: 'neutral1',
+            stars: 0,
+            completed_scenes: [],
+            completed_visits: 0,
+            diploma_earned: false,
+          } : null,
+          parent_email: data.parentEmail || null,
+        });
 
       if (profileError) {
-        console.error('Profile creation failed after retries:', profileError);
-        // Clean up auth user since profile creation failed
+        console.error('Profile creation failed:', profileError);
         await supabase.auth.signOut();
         throw new Error(`Erro ao criar perfil: ${profileError.message}. Verifica se as RLS policies estão configuradas corretamente.`);
       }
 
       console.log('✅ Profile created successfully');
 
-      // Step 4: Fetch and set user
+      // Step 3: Fetch and set user
       const user = await fetchProfile(authData.user.id);
       if (!user) {
         await supabase.auth.signOut();

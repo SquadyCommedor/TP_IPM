@@ -25,21 +25,19 @@ export function RewardBadge({ reward, size = 'md', showDetails = false }: Reward
   };
 
   return (
-    <motion.div
-      initial={{ scale: 0, rotate: -180 }}
-      animate={{ scale: 1, rotate: 0 }}
-      transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-      className={`${showDetails ? 'flex flex-col items-center gap-2' : ''}`}
-    >
-      <div className={`${sizeClasses[size]} ${config.bg} ${config.border} border-2 rounded-full flex items-center justify-center shadow-lg`}>
-        <Icon className={`${size === 'lg' ? 'w-10 h-10' : size === 'md' ? 'w-6 h-6' : 'w-4 h-4'} ${config.color}`} />
-      </div>
+    <div className="flex flex-col items-center">
+      <motion.div
+        whileHover={{ scale: 1.1 }}
+        className={`${sizeClasses[size]} ${config.bg} ${config.border} border-2 rounded-full flex items-center justify-center`}
+      >
+        <Icon className={config.color} size={size === 'lg' ? 32 : size === 'md' ? 24 : 16} />
+      </motion.div>
       {showDetails && (
-        <div className="text-center">
-          <p className="font-bold text-gray-800 text-sm">{reward.title}</p>
+        <div className="text-center mt-2">
+          <p className="font-bold text-sm">{reward.title}</p>
           <p className="text-xs text-gray-500">{reward.description}</p>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

@@ -17,7 +17,7 @@ function ProtectedRoute({ children, allowedRole }: { children: React.ReactNode; 
   const user = useStore((s) => s.user);
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (allowedRole && user?.role !== allowedRole) {
@@ -34,25 +34,18 @@ function AppRoutes() {
   // Show loading screen during initialization
   if (isInitializing) {
     return (
-      <LoadingScreen 
-        message="A preparar..." 
-        submessage="A verificar a tua sessão"
-      />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <LoadingScreen message="A preparar o teu guia..." submessage="A carregar a tua conta" />
+      </div>
     );
   }
 
   return (
-    <Suspense 
-      fallback={
-        <LoadingScreen 
-          message="A carregar página..." 
-          submessage={location.pathname}
-        />
-      }
-    >
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
+    <Suspense fallback={<LoadingScreen message="A carregar..." />}>
+      <Routes location={location}>
+        <Route path="/" element={<LoginPage />} />
 
+        {/* Child Routes */}
         <Route path="/child" element={
           <ProtectedRoute allowedRole="child">
             <ChildDashboard />
@@ -74,14 +67,15 @@ function AppRoutes() {
           </ProtectedRoute>
         } />
 
+        {/* Parent Routes */}
         <Route path="/parent" element={
           <ProtectedRoute allowedRole="parent">
             <ParentDashboard />
           </ProtectedRoute>
         } />
 
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   );

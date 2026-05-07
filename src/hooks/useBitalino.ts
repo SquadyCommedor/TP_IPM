@@ -24,7 +24,7 @@ export function useBitalino(): UseBitalinoReturn {
   const generateReading = useCallback((baseHR: number, variance: number) => {
     const hr = Math.round(baseHR + (Math.random() - 0.5) * variance);
     const eda = Math.random() * 0.5 + 0.1;
-    const stressIndex = Math.min(100, Math.max(0, 
+    const stressIndex = Math.min(100, Math.max(0,
       ((hr - 60) / 100) * 60 + (eda / 0.6) * 40
     ));
 

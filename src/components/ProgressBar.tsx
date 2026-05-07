@@ -5,37 +5,27 @@ interface ProgressBarProps {
   color?: string;
   height?: number;
   showPercentage?: boolean;
-  label?: string;
 }
 
-export function ProgressBar({ 
-  progress, 
-  color = 'bg-primary', 
-  height = 12,
-  showPercentage = false,
-  label
-}: ProgressBarProps) {
+export function ProgressBar({ progress, color = 'bg-primary', height = 8, showPercentage = false }: ProgressBarProps) {
   const clampedProgress = Math.min(100, Math.max(0, progress));
 
   return (
     <div className="w-full">
-      {(label || showPercentage) && (
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
-          {label && <span>{label}</span>}
-          {showPercentage && <span>{Math.round(clampedProgress)}%</span>}
-        </div>
-      )}
       <div 
         className="w-full bg-gray-200 rounded-full overflow-hidden"
-        style={{ height }}
+        style={{ height: `${height}px` }}
       >
         <motion.div
-          className={`h-full rounded-full ${color}`}
+          className={`h-full ${color} rounded-full`}
           initial={{ width: 0 }}
           animate={{ width: `${clampedProgress}%` }}
-          transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
         />
       </div>
+      {showPercentage && (
+        <p className="text-xs text-gray-500 mt-1 text-right">{Math.round(clampedProgress)}%</p>
+      )}
     </div>
   );
 }

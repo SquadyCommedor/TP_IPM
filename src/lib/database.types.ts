@@ -16,19 +16,9 @@ export interface Database {
           email: string;
           role: 'parent' | 'child';
           avatar: string | null;
-          child_profile: {
-            nickname: string;
-            age: number;
-            hair_color: string;
-            character_skin: string;
-            stars: number;
-            completed_scenes: string[];
-            completed_visits: number;
-            diploma_earned: boolean;
-          } | null;
+          child_profile: Json | null;
           parent_email: string | null;
           created_at: string;
-          updated_at: string;
         };
         Insert: {
           id: string;
@@ -39,48 +29,60 @@ export interface Database {
           child_profile?: Json | null;
           parent_email?: string | null;
           created_at?: string;
-          updated_at?: string;
         };
         Update: {
+          id?: string;
           name?: string;
           email?: string;
+          role?: 'parent' | 'child';
           avatar?: string | null;
           child_profile?: Json | null;
           parent_email?: string | null;
-          updated_at?: string;
+          created_at?: string;
         };
       };
       visit_logs: {
         Row: {
           id: string;
-          user_id: string;
+          child_id: string;
           date: string;
           duration: number;
           max_stress: number;
           avg_stress: number;
           pauses: number;
           completed: boolean;
-          notes: string | null;
+          notes: string;
           created_at: string;
         };
         Insert: {
           id?: string;
-          user_id: string;
+          child_id: string;
           date: string;
           duration: number;
           max_stress: number;
           avg_stress: number;
           pauses: number;
           completed: boolean;
-          notes?: string | null;
+          notes?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          child_id?: string;
+          date?: string;
+          duration?: number;
+          max_stress?: number;
+          avg_stress?: number;
+          pauses?: number;
+          completed?: boolean;
+          notes?: string;
           created_at?: string;
         };
       };
       bitalino_readings: {
         Row: {
           id: string;
-          user_id: string;
-          visit_id: string | null;
+          child_id: string;
           timestamp: number;
           heart_rate: number;
           eda: number;
@@ -89,15 +91,32 @@ export interface Database {
         };
         Insert: {
           id?: string;
-          user_id: string;
-          visit_id?: string | null;
+          child_id: string;
           timestamp: number;
           heart_rate: number;
           eda: number;
           stress_index: number;
           created_at?: string;
         };
+        Update: {
+          id?: string;
+          child_id?: string;
+          timestamp?: number;
+          heart_rate?: number;
+          eda?: number;
+          stress_index?: number;
+          created_at?: string;
+        };
       };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
     };
   };
 }

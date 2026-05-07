@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import type { CharacterSkin, HairColor } from '../types';
 import { HAIR_COLORS } from '../data';
+import type { CharacterSkin, HairColor } from '../types';
 
 interface CharacterAvatarProps {
   skin: CharacterSkin;
@@ -30,48 +30,34 @@ export function CharacterAvatar({ skin, hairColor, size = 'md', animate = true, 
   const hairColorObj = HAIR_COLORS.find(h => h.id === hairColor) || HAIR_COLORS[0];
 
   return (
-    <motion.div
-      className={`relative inline-flex items-center justify-center ${className}`}
-      animate={animate ? {
-        y: [0, -8, 0],
-        rotate: [0, 2, -2, 0],
-      } : {}}
-      transition={{
-        duration: 3,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }}
-    >
+    <div className={`relative inline-block ${className}`}>
       {/* Hair color indicator */}
-      <div 
-        className="absolute -top-2 -left-2 w-6 h-6 rounded-full border-2 border-white shadow-md"
+      <div
+        className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-3 rounded-full"
         style={{ backgroundColor: hairColorObj.color }}
-        title={hairColorObj.name}
       />
-
-      <span className={`${sizeClasses[size]} select-none`}>
+      <div className={sizeClasses[size]}>
         {skinEmojis[skin]}
-      </span>
-
+      </div>
       {/* Sparkle effects */}
       {animate && (
         <>
           <motion.div
-            className="absolute -top-1 -right-1 text-yellow-400"
-            animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5] }}
+            animate={{ opacity: [0, 1, 0], y: [0, -10, 0] }}
             transition={{ duration: 2, repeat: Infinity, delay: 0 }}
+            className="absolute -top-2 -right-2 text-yellow-400"
           >
             ✨
           </motion.div>
           <motion.div
-            className="absolute -bottom-1 -left-2 text-yellow-400"
-            animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5] }}
+            animate={{ opacity: [0, 1, 0], y: [0, -10, 0] }}
             transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+            className="absolute -bottom-2 -left-2 text-yellow-400"
           >
             ✨
           </motion.div>
         </>
       )}
-    </motion.div>
+    </div>
   );
 }

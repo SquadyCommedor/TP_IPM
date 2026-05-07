@@ -23,3 +23,23 @@ export const supabase = createClient<Database>(
     },
   }
 );
+
+// Helper para verificar se o utilizador é admin/pai
+export async function isParent(userId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+  return data?.role === 'parent';
+}
+
+// Helper para verificar se o utilizador é criança
+export async function isChild(userId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', userId)
+    .single();
+  return data?.role === 'child';
+}
